@@ -314,6 +314,7 @@ export default function TowerOfHanoi() {
     await autoSubmitScore(username.trim());
     setShowModal(false); // Hide the victory modal once submitted!
     setActiveTab("leaderboard"); // Switch tab to leaderboard instantly!
+    resetGame(); // Reset the board so user can play again immediately!
   };
 
   // Automatic submission trigger when game completes
@@ -551,10 +552,10 @@ export default function TowerOfHanoi() {
 
       <div className="max-w-6xl w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center items-center gap-4 mb-4 flex-wrap">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="flex justify-center items-center gap-3 mb-3 flex-wrap">
             <h1
-              className={`text-5xl font-bold ${
+              className={`text-3xl sm:text-5xl font-bold ${
                 darkMode ? "text-white" : "text-slate-900"
               }`}
             >
@@ -562,7 +563,7 @@ export default function TowerOfHanoi() {
             </h1>
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className={`p-3 rounded-lg ${
+              className={`p-2 sm:p-3 rounded-lg ${
                 darkMode
                   ? "bg-slate-700 text-yellow-400"
                   : "bg-white text-slate-700 shadow-md"
@@ -574,7 +575,7 @@ export default function TowerOfHanoi() {
           <p
             className={`${
               darkMode ? "text-slate-300" : "text-slate-600"
-            } text-lg`}
+            } text-sm sm:text-lg`}
           >
             Move all disks to the rightmost tower
           </p>
@@ -584,24 +585,24 @@ export default function TowerOfHanoi() {
         <div
           className={`${
             darkMode ? "bg-slate-800" : "bg-white shadow-xl"
-          } rounded-xl p-6 mb-6`}
+          } rounded-xl p-4 sm:p-6 mb-4 sm:mb-6`}
         >
-          <div className="flex flex-wrap justify-between items-center text-center gap-4">
+          <div className="flex flex-wrap justify-between items-center text-center gap-3">
             <div className={`${darkMode ? "text-white" : "text-slate-900"}`}>
-              <span className="text-xl font-semibold">Moves: </span>
+              <span className="text-base sm:text-xl font-semibold">Moves: </span>
               <span
                 className={`${
                   darkMode ? "text-blue-400" : "text-blue-600"
-                } font-bold`}
+                } font-bold text-base sm:text-xl`}
               >
                 {moves}
               </span>
-              <span className="ml-3 text-sm opacity-70">(Min: {minMoves})</span>
+              <span className="ml-2 text-xs sm:text-sm opacity-70">(Min: {minMoves})</span>
             </div>
             <div
               className={`${
                 darkMode ? "text-white" : "text-slate-900"
-              } text-lg`}
+              } text-base sm:text-lg`}
             >
               ⏱ {formatTime(time)}
             </div>
@@ -615,11 +616,11 @@ export default function TowerOfHanoi() {
               initial={{ opacity: 0, height: 0, y: -20 }}
               animate={{ opacity: 1, height: "auto", y: 0 }}
               exit={{ opacity: 0, height: 0, y: -20 }}
-              className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6 text-center text-emerald-400 font-bold text-lg flex flex-col sm:flex-row items-center justify-center gap-3 backdrop-blur-sm"
+              className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 text-center text-emerald-400 font-bold text-sm sm:text-lg flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 backdrop-blur-sm"
             >
               <div className="flex items-center gap-2">
                 <span>🏆</span>
-                <span>Victory! Completed in {moves} moves in {formatTime(time)}!</span>
+                <span>Victory! {moves} moves · {formatTime(time)}</span>
               </div>
               <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full font-medium">
                 {isSubmitting ? "Submitting..." : hasSubmitted ? "✅ Score Auto-Submitted" : "Offline Record Saved"}
@@ -634,7 +635,7 @@ export default function TowerOfHanoi() {
         </AnimatePresence>
 
         {/* Game Area */}
-        <div className="flex justify-around items-end min-h-[340px] sm:h-[450px] mb-8 gap-2 sm:gap-6 px-2">
+        <div className="flex justify-around items-end min-h-[280px] sm:min-h-[340px] md:h-[450px] mb-6 sm:mb-8 gap-1 sm:gap-6 px-1 sm:px-2">
           {towers.map((tower, i) => {
             const topDisk = tower[tower.length - 1];
             return (
@@ -742,17 +743,17 @@ export default function TowerOfHanoi() {
         </div>
 
         {/* Controls */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <button
             onClick={() => resetGame()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
+            className="px-4 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition active:scale-95"
           >
             🔄 Reset Game
           </button>
           <select
             value={disks}
             onChange={(e) => resetGame(Number(e.target.value))}
-            className={`px-6 py-3 rounded-lg border-2 ${
+            className={`px-4 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base rounded-lg border-2 ${
               darkMode
                 ? "bg-slate-700 text-white border-slate-600"
                 : "bg-white border-slate-300 text-slate-900"
@@ -768,17 +769,17 @@ export default function TowerOfHanoi() {
 
         {/* Stats & Leaderboard Dashboard */}
         <div
-          className={`rounded-2xl p-6 mb-6 transition-all duration-500 border ${
+          className={`rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 transition-all duration-500 border ${
             darkMode
               ? "bg-slate-800/90 border-slate-700/50 shadow-2xl backdrop-blur-sm"
               : "bg-white border-slate-200 shadow-xl"
           }`}
         >
           {/* Tab Headers */}
-          <div className={`flex border-b mb-6 gap-2 ${darkMode ? "border-slate-700/40" : "border-slate-200"}`}>
+          <div className={`flex border-b mb-4 sm:mb-6 gap-1 ${darkMode ? "border-slate-700/40" : "border-slate-200"}`}>
             <button
               onClick={() => setActiveTab("stats")}
-              className={`pb-3 px-4 font-bold text-base transition-all relative ${
+              className={`pb-2.5 sm:pb-3 px-2 sm:px-4 font-bold text-xs sm:text-base transition-all relative ${
                 activeTab === "stats"
                   ? darkMode
                     ? "text-blue-400 border-b-2 border-blue-400"
@@ -788,11 +789,11 @@ export default function TowerOfHanoi() {
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              📊 Player Statistics
+              📊 <span className="hidden sm:inline">Player </span>Statistics
             </button>
             <button
               onClick={() => setActiveTab("leaderboard")}
-              className={`pb-3 px-4 font-bold text-base transition-all relative ${
+              className={`pb-2.5 sm:pb-3 px-2 sm:px-4 font-bold text-xs sm:text-base transition-all relative ${
                 activeTab === "leaderboard"
                   ? darkMode
                     ? "text-blue-400 border-b-2 border-blue-400"
@@ -802,7 +803,7 @@ export default function TowerOfHanoi() {
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              🏆 Online Leaderboards ({disks} Disks)
+              🏆 <span className="hidden sm:inline">Online </span>Leaderboards <span className="hidden xs:inline">({disks} Disks)</span>
             </button>
           </div>
 
@@ -843,14 +844,14 @@ export default function TowerOfHanoi() {
                   Comparative Record across All Disk Counts
                 </h3>
                 <div className={`overflow-x-auto rounded-xl border ${darkMode ? "border-slate-700/50" : "border-slate-200"}`}>
-                  <table className="w-full text-sm text-left">
-                    <thead className={`${darkMode ? "bg-slate-900/80 text-slate-300" : "bg-slate-100 text-slate-650"} uppercase text-xs font-bold`}>
+                  <table className="w-full text-xs sm:text-sm text-left">
+                    <thead className={`${darkMode ? "bg-slate-900/80 text-slate-300" : "bg-slate-100 text-slate-650"} uppercase text-[10px] sm:text-xs font-bold`}>
                       <tr>
-                        <th className="px-6 py-4">Size</th>
-                        <th className="px-6 py-4 text-center">Completed</th>
-                        <th className="px-6 py-4 text-center">Fewest Moves</th>
-                        <th className="px-6 py-4 text-center">Best Time</th>
-                        <th className="px-6 py-4 text-right">Total Time</th>
+                        <th className="px-2 py-3 sm:px-6 sm:py-4">Size</th>
+                        <th className="px-2 py-3 sm:px-6 sm:py-4 text-center">Done</th>
+                        <th className="px-2 py-3 sm:px-6 sm:py-4 text-center">Moves</th>
+                        <th className="px-2 py-3 sm:px-6 sm:py-4 text-center">Best</th>
+                        <th className="px-2 py-3 sm:px-6 sm:py-4 text-right hidden sm:table-cell">Total Time</th>
                       </tr>
                     </thead>
                     <tbody className={`divide-y ${darkMode ? "divide-slate-700/20" : "divide-slate-200/60"}`}>
@@ -870,14 +871,16 @@ export default function TowerOfHanoi() {
                                 : "hover:bg-slate-50 text-slate-700"
                             }`}
                           >
-                            <td className="px-6 py-4 flex items-center gap-2">
-                              <span>🎮 {d} Disks</span>
-                              {isCurrent && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full font-bold">Active</span>}
+                            <td className="px-2 py-3 sm:px-6 sm:py-4">
+                              <div className="flex items-center gap-1">
+                                <span>🎮 {d}D</span>
+                                {isCurrent && <span className="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full font-bold hidden xs:inline">Active</span>}
+                              </div>
                             </td>
-                            <td className="px-6 py-4 text-center">{dStats.gamesCompleted}</td>
-                            <td className="px-6 py-4 text-center font-mono">{dStats.fewestMoves ?? "--"}</td>
-                            <td className="px-6 py-4 text-center font-mono">{dStats.bestTime ? formatTime(dStats.bestTime) : "--:--"}</td>
-                            <td className="px-6 py-4 text-right font-mono">{formatTime(dStats.totalTime)}</td>
+                            <td className="px-2 py-3 sm:px-6 sm:py-4 text-center">{dStats.gamesCompleted}</td>
+                            <td className="px-2 py-3 sm:px-6 sm:py-4 text-center font-mono">{dStats.fewestMoves ?? "--"}</td>
+                            <td className="px-2 py-3 sm:px-6 sm:py-4 text-center font-mono">{dStats.bestTime ? formatTime(dStats.bestTime) : "--:--"}</td>
+                            <td className="px-2 py-3 sm:px-6 sm:py-4 text-right font-mono hidden sm:table-cell">{formatTime(dStats.totalTime)}</td>
                           </tr>
                         );
                       })}
@@ -963,25 +966,22 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
               ) : (
                 <div className="space-y-4">
                   <div className={`overflow-x-auto rounded-xl border ${darkMode ? "border-slate-700/50" : "border-slate-200"}`}>
-                    <table className="w-full text-sm text-left">
-                      <thead className={`${darkMode ? "bg-slate-900/80 text-slate-300" : "bg-slate-100 text-slate-600"} uppercase text-xs font-bold`}>
+                    <table className="w-full text-xs sm:text-sm text-left">
+                      <thead className={`${darkMode ? "bg-slate-900/80 text-slate-300" : "bg-slate-100 text-slate-600"} uppercase text-[10px] sm:text-xs font-bold`}>
                         <tr>
-                          <th className="px-6 py-4">Rank</th>
-                          <th className="px-6 py-4">Player</th>
-                          <th className="px-6 py-4 text-center">Moves</th>
-                          <th className="px-6 py-4 text-center">Time</th>
-                          <th className="px-6 py-4 text-right">Date</th>
+                          <th className="px-2 py-3 sm:px-6 sm:py-4">Rank</th>
+                          <th className="px-2 py-3 sm:px-6 sm:py-4">Player</th>
+                          <th className="px-2 py-3 sm:px-6 sm:py-4 text-center">Moves</th>
+                          <th className="px-2 py-3 sm:px-6 sm:py-4 text-center">Time</th>
+                          <th className="px-2 py-3 sm:px-6 sm:py-4 text-right hidden sm:table-cell">Date</th>
                         </tr>
                       </thead>
                       <tbody className={`divide-y ${darkMode ? "divide-slate-700/20" : "divide-slate-200/60"}`}>
                         {paginatedData.map((row, idx) => {
                           const rank = startIndex + idx + 1;
                           const isCurrentUser = row.username.toLowerCase() === username.toLowerCase();
-                          let rankBadge = `${rank}`;
-                          if (rank === 1) rankBadge = "🥇 1";
-                          else if (rank === 2) rankBadge = "🥈 2";
-                          else if (rank === 3) rankBadge = "🥉 3";
- 
+                          let rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+
                           return (
                             <tr
                               key={row.id}
@@ -995,14 +995,16 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
                                   : "hover:bg-slate-50 text-slate-700"
                               }`}
                             >
-                              <td className="px-6 py-4 font-bold">{rankBadge}</td>
-                              <td className="px-6 py-4 flex items-center gap-2">
-                                <span>{row.username}</span>
-                                {isCurrentUser && <span className="text-[10px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded font-bold">You</span>}
+                              <td className="px-2 py-3 sm:px-6 sm:py-4 font-bold whitespace-nowrap">{rankBadge}</td>
+                              <td className="px-2 py-3 sm:px-6 sm:py-4">
+                                <div className="flex items-center gap-1 sm:gap-2">
+                                  <span className="truncate max-w-[80px] sm:max-w-none">{row.username}</span>
+                                  {isCurrentUser && <span className="text-[9px] bg-amber-500/20 text-amber-400 px-1 sm:px-1.5 py-0.5 rounded font-bold shrink-0">You</span>}
+                                </div>
                               </td>
-                              <td className="px-6 py-4 text-center font-mono">{row.moves}</td>
-                              <td className="px-6 py-4 text-center font-mono">{formatTime(row.time)}</td>
-                              <td className="px-6 py-4 text-right text-xs opacity-75 font-mono">
+                              <td className="px-2 py-3 sm:px-6 sm:py-4 text-center font-mono">{row.moves}</td>
+                              <td className="px-2 py-3 sm:px-6 sm:py-4 text-center font-mono">{formatTime(row.time)}</td>
+                              <td className="px-2 py-3 sm:px-6 sm:py-4 text-right text-xs opacity-75 font-mono hidden sm:table-cell">
                                 {new Date(row.created_at).toLocaleDateString(undefined, {
                                   month: "short",
                                   day: "numeric",
@@ -1118,18 +1120,18 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4"
           >
             <motion.div
               initial={{ scale: 0.9, y: 50, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 50, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className={`max-w-md w-full rounded-2xl p-8 border shadow-2xl ${
+              className={`max-w-md w-full rounded-2xl p-5 sm:p-8 border shadow-2xl ${
                 darkMode
                   ? "bg-slate-900 border-slate-800 text-white"
                   : "bg-white border-slate-200 text-slate-900"
-              } text-center relative overflow-hidden`}
+              } text-center relative overflow-hidden max-h-[90vh] overflow-y-auto`}
             >
               {/* Decorative Glow */}
               <div className="absolute -top-24 -left-24 w-48 h-48 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"></div>
@@ -1140,31 +1142,31 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
                 initial={{ scale: 0 }}
                 animate={{ scale: [0, 1.2, 1] }}
                 transition={{ delay: 0.2, duration: 0.5 }}
-                className="w-20 h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/20"
+                className="w-14 h-14 sm:w-20 sm:h-20 bg-gradient-to-tr from-yellow-400 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-amber-500/20"
               >
-                <span className="text-4xl">🏆</span>
+                <span className="text-2xl sm:text-4xl">🏆</span>
               </motion.div>
 
-              <h2 className="text-3xl font-extrabold mb-2 tracking-tight bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">
+              <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">
                 Victory Achieved!
               </h2>
-              <p className={`text-sm mb-6 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+              <p className={`text-xs sm:text-sm mb-4 sm:mb-6 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
                 You have successfully completed the {disks}-disk puzzle!
               </p>
 
               {/* Stats Review */}
-              <div className={`grid grid-cols-2 gap-4 p-4 rounded-xl mb-6 ${
+              <div className={`grid grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 ${
                 darkMode ? "bg-slate-800/50 border border-slate-700/50" : "bg-slate-50 border border-slate-100"
               }`}>
                 <div>
-                  <p className={`text-xs uppercase font-semibold tracking-wider mb-1 ${darkMode ? "text-slate-450" : "text-slate-500"}`}>Moves</p>
-                  <p className="text-2xl font-black text-blue-500">{moves}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">Min Required: {minMoves}</p>
+                  <p className={`text-[10px] sm:text-xs uppercase font-semibold tracking-wider mb-1 ${darkMode ? "text-slate-450" : "text-slate-500"}`}>Moves</p>
+                  <p className="text-xl sm:text-2xl font-black text-blue-500">{moves}</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">Min Required: {minMoves}</p>
                 </div>
                 <div>
-                  <p className={`text-xs uppercase font-semibold tracking-wider mb-1 ${darkMode ? "text-slate-450" : "text-slate-500"}`}>Time</p>
-                  <p className="text-2xl font-black text-emerald-500">{formatTime(time)}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
+                  <p className={`text-[10px] sm:text-xs uppercase font-semibold tracking-wider mb-1 ${darkMode ? "text-slate-450" : "text-slate-500"}`}>Time</p>
+                  <p className="text-xl sm:text-2xl font-black text-emerald-500">{formatTime(time)}</p>
+                  <p className="text-[9px] sm:text-[10px] text-slate-400 mt-0.5">
                     Best: {stats[disks]?.bestTime ? formatTime(stats[disks].bestTime) : "--:--"}
                   </p>
                 </div>
@@ -1249,12 +1251,12 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-6 py-3.5 rounded-xl shadow-2xl border bg-slate-900/90 text-white border-red-500/30 backdrop-blur-md"
+            className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl shadow-2xl border bg-slate-900/90 text-white border-red-500/30 backdrop-blur-md w-[90%] max-w-sm sm:max-w-md"
           >
-            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-sm font-bold">
+            <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-xs sm:text-sm font-bold shrink-0">
               ⚠️
             </div>
-            <span className="text-sm font-medium text-slate-100">
+            <span className="text-xs sm:text-sm font-medium text-slate-100 leading-snug">
               {toast.message}
             </span>
           </motion.div>
