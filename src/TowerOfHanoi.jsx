@@ -158,7 +158,7 @@ export default function TowerOfHanoi() {
 
     try {
       const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/leaderboard_view?disk_count=eq.${disks}&order=moves.asc,time.asc&limit=100`,
+        `${SUPABASE_URL}/rest/v1/leaderboard?disk_count=eq.${disks}&order=moves.asc,time.asc&limit=100`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
@@ -219,7 +219,6 @@ export default function TowerOfHanoi() {
       if (!checkResponse.ok) throw new Error("Failed to verify existing records.");
       const existingRecords = await checkResponse.json();
 
-      let shouldInsert = true;
       if (existingRecords.length > 0) {
         // Find their absolute best record among any duplicates
         let bestRecord = existingRecords[0];
@@ -237,14 +236,46 @@ export default function TowerOfHanoi() {
           moves < bestRecord.moves ||
           (moves === bestRecord.moves && time < bestRecord.time);
 
-        if (!isBetter) {
-          shouldInsert = false;
+        if (isBetter) {
+          // Update the best record to the new score via PATCH
+          const updateResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/leaderboard?id=eq.${bestRecord.id}`,
+            {
+              method: "PATCH",
+              headers: {
+                apikey: SUPABASE_ANON_KEY,
+                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                moves: moves,
+                time: time,
+                created_at: new Date().toISOString(),
+              }),
+            }
+          );
+
+          if (!updateResponse.ok) throw new Error("Failed to update score.");
+          showToast("🎉 New personal best submitted automatically!");
+        } else {
           showToast("🎉 Game completed! Personal best not beaten.");
         }
-      }
 
-      if (shouldInsert) {
-        // Insert new record since it beats their best score or none exists
+        // Clean up legacy duplicate rows for this user & disk size to keep the DB perfectly clean!
+        if (existingRecords.length > 1) {
+          await fetch(
+            `${SUPABASE_URL}/rest/v1/leaderboard?username=eq.${nameToSubmit}&disk_count=eq.${disks}&id=neq.${bestRecord.id}`,
+            {
+              method: "DELETE",
+              headers: {
+                apikey: SUPABASE_ANON_KEY,
+                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              },
+            }
+          );
+        }
+      } else {
+        // Insert new record since none exist via POST
         const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard`, {
           method: "POST",
           headers: {
@@ -262,7 +293,7 @@ export default function TowerOfHanoi() {
         });
 
         if (!insertResponse.ok) throw new Error("Failed to submit score.");
-        showToast("🎉 New personal best submitted automatically!");
+        showToast("🎉 Score submitted automatically!");
       }
 
       setHasSubmitted(true);
