@@ -25,8 +25,8 @@ export default function TowerOfHanoi() {
     }
   }, [toast]);
 
-  const showToast = useCallback((message) => {
-    setToast({ message, id: Date.now() });
+  const showToast = useCallback((message, type = "info") => {
+    setToast({ message, type, id: Date.now() });
   }, []);
 
   const [stats, setStats] = useState(() => {
@@ -157,13 +157,20 @@ export default function TowerOfHanoi() {
     }
 
     try {
+      const headers = {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      };
+      if (force) {
+        headers["Cache-Control"] = "no-cache";
+        headers["Pragma"] = "no-cache";
+      }
+
       const response = await fetch(
         `${SUPABASE_URL}/rest/v1/leaderboard?disk_count=eq.${disks}&order=moves.asc,time.asc&limit=100`,
         {
-          headers: {
-            apikey: SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          },
+          headers,
+          ...(force ? { cache: "no-store" } : {}),
         }
       );
 
@@ -205,9 +212,9 @@ export default function TowerOfHanoi() {
 
     setIsSubmitting(true);
     try {
-      // 1. Check if the user already has records for this disk count
+      // 1. Check if the user already has records for this disk count (case-insensitive)
       const checkResponse = await fetch(
-        `${SUPABASE_URL}/rest/v1/leaderboard?username=eq.${nameToSubmit}&disk_count=eq.${disks}`,
+        `${SUPABASE_URL}/rest/v1/leaderboard?username=ilike.${encodeURIComponent(nameToSubmit)}&disk_count=eq.${disks}`,
         {
           headers: {
             apikey: SUPABASE_ANON_KEY,
@@ -251,20 +258,21 @@ export default function TowerOfHanoi() {
                 moves: moves,
                 time: time,
                 created_at: new Date().toISOString(),
+                username: nameToSubmit, // Update username casing to preference
               }),
             }
           );
 
           if (!updateResponse.ok) throw new Error("Failed to update score.");
-          showToast("🎉 New personal best submitted automatically!");
+          showToast("🎉 New personal best submitted automatically!", "success");
         } else {
-          showToast("🎉 Game completed! Personal best not beaten.");
+          showToast("🎉 Game completed! Personal best not beaten.", "info");
         }
 
         // Clean up legacy duplicate rows for this user & disk size to keep the DB perfectly clean!
         if (existingRecords.length > 1) {
           await fetch(
-            `${SUPABASE_URL}/rest/v1/leaderboard?username=eq.${nameToSubmit}&disk_count=eq.${disks}&id=neq.${bestRecord.id}`,
+            `${SUPABASE_URL}/rest/v1/leaderboard?username=ilike.${encodeURIComponent(nameToSubmit)}&disk_count=eq.${disks}&id=neq.${bestRecord.id}`,
             {
               method: "DELETE",
               headers: {
@@ -293,13 +301,13 @@ export default function TowerOfHanoi() {
         });
 
         if (!insertResponse.ok) throw new Error("Failed to submit score.");
-        showToast("🎉 Score submitted automatically!");
+        showToast("🎉 Score submitted automatically!", "success");
       }
 
       setHasSubmitted(true);
-      fetchLeaderboard(true); // Force refresh leaderboard data & update cache
+      await fetchLeaderboard(true); // Force refresh leaderboard data & update cache (awaited to prevent race condition)
     } catch {
-      showToast("⚠️ Automatic leaderboard submission failed.");
+      showToast("⚠️ Automatic leaderboard submission failed.", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -443,7 +451,7 @@ export default function TowerOfHanoi() {
       // Invalid move! Trigger shake, show warning toast, and switch selection
       setShakeTower(toIndex);
       setTimeout(() => setShakeTower(null), 500);
-      showToast("A larger disk cannot be placed on top of a smaller disk!");
+      showToast("A larger disk cannot be placed on top of a smaller disk!", "warning");
       setSelectedTower(toIndex);
     }
   }, [towers, isRunning, moves, showToast]);
@@ -952,7 +960,8 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
                   <span className="text-xl mb-2 block">⚠️</span>
                   <p className="text-xs text-red-400 mb-4">{leaderboardError}</p>
                   <button
-                                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 ${
+                    onClick={() => fetchLeaderboard(true)}
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all active:scale-95 ${
                       darkMode ? "bg-slate-700 text-white hover:bg-slate-600" : "bg-slate-100 text-slate-800 hover:bg-slate-200"
                     }`}
                   >
@@ -1251,10 +1260,22 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key`}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl shadow-2xl border bg-slate-900/90 text-white border-red-500/30 backdrop-blur-md w-[90%] max-w-sm sm:max-w-md"
+            className={`fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl shadow-2xl border bg-slate-900/90 text-white backdrop-blur-md w-[90%] max-w-sm sm:max-w-md ${
+              toast.type === "success"
+                ? "border-emerald-500/30"
+                : toast.type === "error" || toast.type === "warning"
+                ? "border-red-500/30"
+                : "border-blue-500/30"
+            }`}
           >
-            <div className="flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-red-500/20 text-red-400 border border-red-500/30 text-xs sm:text-sm font-bold shrink-0">
-              ⚠️
+            <div className={`flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full text-xs sm:text-sm font-bold shrink-0 ${
+              toast.type === "success"
+                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                : toast.type === "error" || toast.type === "warning"
+                ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                : "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+            }`}>
+              {toast.type === "success" ? "✓" : toast.type === "error" || toast.type === "warning" ? "⚠️" : "ℹ️"}
             </div>
             <span className="text-xs sm:text-sm font-medium text-slate-100 leading-snug">
               {toast.message}
