@@ -244,35 +244,9 @@ export default function TowerOfHanoi() {
           (moves === bestRecord.moves && time < bestRecord.time);
 
         if (isBetter) {
-          // Update the best record to the new score via PATCH
-          const updateResponse = await fetch(
-            `${SUPABASE_URL}/rest/v1/leaderboard?id=eq.${bestRecord.id}`,
-            {
-              method: "PATCH",
-              headers: {
-                apikey: SUPABASE_ANON_KEY,
-                Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                moves: moves,
-                time: time,
-                created_at: new Date().toISOString(),
-                username: nameToSubmit, // Update username casing to preference
-              }),
-            }
-          );
-
-          if (!updateResponse.ok) throw new Error("Failed to update score.");
-          showToast("🎉 New personal best submitted automatically!", "success");
-        } else {
-          showToast("🎉 Game completed! Personal best not beaten.", "info");
-        }
-
-        // Clean up legacy duplicate rows for this user & disk size to keep the DB perfectly clean!
-        if (existingRecords.length > 1) {
+          // Delete ALL existing records for this user+disk (best-effort, may silently fail if DELETE RLS policy is missing)
           await fetch(
-            `${SUPABASE_URL}/rest/v1/leaderboard?username=ilike.${encodeURIComponent(nameToSubmit)}&disk_count=eq.${disks}&id=neq.${bestRecord.id}`,
+            `${SUPABASE_URL}/rest/v1/leaderboard?username=ilike.${encodeURIComponent(nameToSubmit)}&disk_count=eq.${disks}`,
             {
               method: "DELETE",
               headers: {
@@ -281,6 +255,42 @@ export default function TowerOfHanoi() {
               },
             }
           );
+
+          // Insert the new personal best (INSERT policy is reliable)
+          const insertResponse = await fetch(`${SUPABASE_URL}/rest/v1/leaderboard`, {
+            method: "POST",
+            headers: {
+              apikey: SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+              "Content-Type": "application/json",
+              Prefer: "return=representation",
+            },
+            body: JSON.stringify({
+              username: nameToSubmit,
+              disk_count: disks,
+              moves: moves,
+              time: time,
+            }),
+          });
+
+          if (!insertResponse.ok) throw new Error("Failed to submit new personal best.");
+          showToast("🎉 New personal best submitted automatically!", "success");
+        } else {
+          showToast("🎉 Game completed! Personal best not beaten.", "info");
+
+          // Clean up any legacy duplicate rows (best-effort)
+          if (existingRecords.length > 1) {
+            await fetch(
+              `${SUPABASE_URL}/rest/v1/leaderboard?username=ilike.${encodeURIComponent(nameToSubmit)}&disk_count=eq.${disks}&id=neq.${bestRecord.id}`,
+              {
+                method: "DELETE",
+                headers: {
+                  apikey: SUPABASE_ANON_KEY,
+                  Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+                },
+              }
+            );
+          }
         }
       } else {
         // Insert new record since none exist via POST
